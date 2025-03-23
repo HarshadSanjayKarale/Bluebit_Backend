@@ -28,10 +28,19 @@ def load_bert_model():
     global global_tokenizer, global_model
     try:
         from transformers import BertTokenizer, BertForSequenceClassification
-        print("Loading BERT model and tokenizer...")
+        import os
+        
+        print("Loading BERT tokenizer...")
+        # Load the tokenizer first
         global_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        global_model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
-        print("BERT model loaded successfully")
+        
+        # Only load the model in production if enough memory
+        if os.environ.get('LOAD_BERT_MODEL', '').lower() == 'true':
+            print("Loading BERT model...")
+            global_model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
+            print("BERT model loaded successfully")
+        else:
+            print("BERT model loading skipped - set LOAD_BERT_MODEL=true to enable")
     except Exception as e:
         print(f"Error loading BERT model: {str(e)}")
 
@@ -979,7 +988,7 @@ def get_bert_recommendations(user_id):
                 bert_recommended_articles.extend(random_articles)
         
         # If user has liked articles, try to get some subdomain recommendations
-        if liked_articles and global_tokenizer and global_model and len(bert_recommended_articles) < 10:
+        if liked_articles and global_tokenizer and len(bert_recommended_articles) < 10:
             try:
                 # Use only a few liked articles to keep it fast
                 recent_liked = liked_articles[:3]
