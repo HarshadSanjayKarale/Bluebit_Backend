@@ -115,6 +115,16 @@ def get_wikipedia_data(topic):
         print(f"An error occurred: {str(e)}")
         return None
 
+
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        "status": "online",
+        "message": "Bluebit Backend API is running",
+        "version": "1.0.0",
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }), 200
+
 @app.route('/wiki', methods=['GET'])
 def wiki_data():
     topic = request.args.get('topic')
